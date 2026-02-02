@@ -14,6 +14,7 @@ import org.dynmap.markers.MarkerSet;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuartersDynmapHook extends DynmapCommonAPIListener implements QuartersMapHook {
 
@@ -40,70 +41,71 @@ public class QuartersDynmapHook extends DynmapCommonAPIListener implements Quart
                 false
         );
 
-        qm.getAllQuarters().forEach(this::addQuarterMarker);
+        qm.getAllQuarters().forEach(this::addQuarterMarkers);
     }
 
-    public void addQuarterMarker(Quarter q) {
+    public void addQuarterMarkers(Quarter q) {
         MapManager mm = MapManager.getInstance();
 
         String areaName = mm.getQuarterMarkerIdentifier(q);
 
-        Pair<double[], double[]> traced = traceQuarter(q);
-        double[] tracedX = traced.getFirst();
-        double[] tracedZ = traced.getSecond();
+        ArrayList<Pair<double[], double[]>> traced = traceQuarter(q);
 
         // getFirst() errors on compile for some reason
         World qWorld = q.getCuboids().get(0).getWorld();
 
-        quarterMarkerSet.createAreaMarker(
-                areaName,
-                mm.getQuarterMarkerLabel(q),
-                true,
-                qWorld.getName(),
-                tracedX,
-                tracedZ,
-                false
-        );
+        String label =  mm.getQuarterMarkerLabel(q);
+
+        AtomicInteger i = new AtomicInteger();
+        traced.forEach((Pair<double[], double[]> t) -> {
+            double[] tracedX = t.getFirst();
+            double[] tracedZ = t.getSecond();
+
+            quarterMarkerSet.createAreaMarker(
+                    areaName + "_cuboid_" + i,
+                    label,
+                    true,
+                    qWorld.getName(),
+                    tracedX,
+                    tracedZ,
+                    false
+            );
+
+            i.getAndIncrement();
+        });
     }
 
-    public void removeQuarterMarker(Quarter q) {
+    public void removeQuarterMarkers(Quarter q) {
         MapManager mm = MapManager.getInstance();
 
         String areaName = mm.getQuarterMarkerIdentifier(q);
-        AreaMarker foundMarker = quarterMarkerSet.findAreaMarker(areaName);
 
-        if (foundMarker != null) foundMarker.deleteMarker();
+        for (int i = 0; i < q.getCuboids().size(); i++) {
+            AreaMarker foundMarker = quarterMarkerSet.findAreaMarker(areaName + "_cuboid_" + i);
+            if (foundMarker != null) foundMarker.deleteMarker();
+        }
     }
 
-    public void refreshQuarterMarker(Quarter q) {
-        removeQuarterMarker(q);
-        addQuarterMarker(q);
-    }
-
-    public Pair<double[], double[]> traceQuarter(Quarter q) {
-        ArrayList<Double> tracedX = new ArrayList<>();
-        ArrayList<Double> tracedZ = new ArrayList<>();
+    public ArrayList<Pair<double[], double[]>> traceQuarter(Quarter q) {
+        ArrayList<Pair<double[], double[]>> tracedCuboids = new ArrayList<>();
 
         q.getCuboids().forEach((Cuboid c) -> {
-            Location c1 = c.getCornerBlockOne().getLocation();
-            Location c2 = c.getCornerBlockTwo().getLocation();
+            double[] cuboidX = new double[4];
+            double[] cuboidZ = new double[4];
 
-            tracedX.add(c1.x() + 1);
-            tracedZ.add(c1.z() + 1);
-            tracedX.add(c1.x() + 1);
-            tracedZ.add(c2.z() + 1);
-            tracedX.add(c2.x() + 1);
-            tracedZ.add(c2.z());
-            tracedX.add(c2.x());
-            tracedZ.add(c1.z());
-            tracedX.add(c1.x());
-            tracedZ.add(c1.z() + 1);
+            cuboidX[0] = c.getMinX();
+            cuboidZ[0] = c.getMinZ();
+            cuboidX[1] = c.getMinX();
+            cuboidZ[1] = c.getMaxZ() + 1;
+            cuboidX[2] = c.getMaxX() + 1;
+            cuboidZ[2] = c.getMaxZ() + 1;
+            cuboidX[3] = c.getMaxX() + 1;
+            cuboidZ[3] = c.getMinZ();
+
+            tracedCuboids.add(new Pair<>(cuboidX, cuboidZ));
         });
 
-        return Pair.of(
-                tracedX.stream().mapToDouble(d -> d).toArray(),
-                tracedZ.stream().mapToDouble(d -> d).toArray()
-        );
+        return tracedCuboids;
     }
 
 }

@@ -4,7 +4,6 @@ import au.lupine.quarters.Quarters;
 import au.lupine.quarters.hook.QuartersDynmapHook;
 import au.lupine.quarters.object.entity.Quarter;
 import com.palmergames.bukkit.towny.object.Town;
-import org.bukkit.OfflinePlayer;
 
 public final class MapManager {
 
@@ -54,18 +53,23 @@ public final class MapManager {
 
     public void addQuarterMarker(Quarter q) {
         if (Quarters.getInstance().getServer().getPluginManager().getPlugin("dynmap").isEnabled()) {
-            QuartersDynmapHook.getInstance().addQuarterMarker(q);
+            QuartersDynmapHook.getInstance().addQuarterMarkers(q);
         }
     }
 
     public void removeQuarterMarker(Quarter q) {
         if (Quarters.getInstance().getServer().getPluginManager().getPlugin("dynmap").isEnabled()) {
-            QuartersDynmapHook.getInstance().removeQuarterMarker(q);
+            QuartersDynmapHook.getInstance().removeQuarterMarkers(q);
         }
     }
 
     public void refreshQuarterMarker(Quarter q) {
         removeQuarterMarker(q);
+        addQuarterMarker(q);
+    }
+
+    public void refreshQuarterMarker(Quarter oldQ, Quarter q) {
+        removeQuarterMarker(oldQ);
         addQuarterMarker(q);
     }
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Quarter extends TownyObject {
 
@@ -85,10 +86,14 @@ public class Quarter extends TownyObject {
         MapManager mm = MapManager.getInstance();
 
         List<Quarter> quarters = qm.getQuarters(town);
+        Quarter oldQuarter = quarters.stream().filter(
+                (i) -> i.uuid == this.uuid
+        ).toList().get(0);
+
         quarters.remove(this);
         quarters.add(this);
 
-        mm.refreshQuarterMarker(this);
+        mm.refreshQuarterMarker(oldQuarter, this);
 
         qm.setQuarters(town, quarters);
     }
