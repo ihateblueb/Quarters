@@ -1,9 +1,11 @@
 package au.lupine.quarters.api.manager;
 
 import au.lupine.quarters.Quarters;
+import au.lupine.quarters.hook.QuartersBlueMapHook;
 import au.lupine.quarters.hook.QuartersDynmapHook;
 import au.lupine.quarters.object.entity.Quarter;
 import com.palmergames.bukkit.towny.object.Town;
+import org.bukkit.plugin.Plugin;
 
 public final class MapManager {
 
@@ -52,14 +54,28 @@ public final class MapManager {
     }
 
     public void addQuarterMarker(Quarter q) {
-        if (Quarters.getInstance().getServer().getPluginManager().getPlugin("dynmap").isEnabled()) {
-            QuartersDynmapHook.getInstance().addQuarterMarkers(q);
+        Plugin dynmap = Quarters.getInstance().getServer().getPluginManager().getPlugin("dynmap");
+        Plugin bluemap = Quarters.getInstance().getServer().getPluginManager().getPlugin("BlueMap");
+
+        if (dynmap != null && dynmap.isEnabled()) {
+            QuartersDynmapHook.getInstance().removeQuarterMarkers(q);
+        }
+
+        if (bluemap != null && bluemap.isEnabled()) {
+            QuartersBlueMapHook.getInstance().removeQuarterMarkers(q);
         }
     }
 
     public void removeQuarterMarker(Quarter q) {
-        if (Quarters.getInstance().getServer().getPluginManager().getPlugin("dynmap").isEnabled()) {
+        Plugin dynmap = Quarters.getInstance().getServer().getPluginManager().getPlugin("dynmap");
+        Plugin bluemap = Quarters.getInstance().getServer().getPluginManager().getPlugin("BlueMap");
+
+        if (dynmap != null && dynmap.isEnabled()) {
             QuartersDynmapHook.getInstance().removeQuarterMarkers(q);
+        }
+
+        if (bluemap != null && bluemap.isEnabled()) {
+            QuartersBlueMapHook.getInstance().removeQuarterMarkers(q);
         }
     }
 

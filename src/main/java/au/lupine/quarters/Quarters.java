@@ -3,7 +3,7 @@ package au.lupine.quarters;
 import au.lupine.quarters.api.manager.ConfigManager;
 import au.lupine.quarters.command.quarters.QuartersCommand;
 import au.lupine.quarters.command.quartersadmin.QuartersAdminCommand;
-import au.lupine.quarters.hook.QuartersDynmapHook;
+import au.lupine.quarters.hook.QuartersMapHook;
 import au.lupine.quarters.hook.QuartersPlaceholderExpansion;
 import au.lupine.quarters.listener.*;
 import au.lupine.quarters.object.metadata.QuarterListDataField;
@@ -14,9 +14,9 @@ import com.palmergames.util.JavaUtil;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.dynmap.DynmapCommonAPIListener;
 
 import java.util.logging.Logger;
 
@@ -49,11 +49,6 @@ public final class Quarters extends JavaPlugin {
             logWarning("You seem to be using an older version of Towny, version 0.101.2.5 or above is required for quarters statistics to show in resident/town status screens.");
         } else {
             registerListeners(new StatusScreenListener());
-        }
-
-        if (this.getServer().getPluginManager().getPlugin("dynmap").isEnabled()) {
-            logInfo("Enabled Dynmap integration");
-            DynmapCommonAPIListener.register(QuartersDynmapHook.getInstance());
         }
 
         logInfo("Quarters enabled :3");
@@ -92,7 +87,34 @@ public final class Quarters extends JavaPlugin {
     private void registerHooks() {
         PluginManager pm = getServer().getPluginManager();
 
-        if (pm.getPlugin("PlaceholderAPI") != null) new QuartersPlaceholderExpansion().register();
+        Plugin placeholderApi = pm.getPlugin("PlaceholderAPI");
+        if (placeholderApi != null && placeholderApi.isEnabled()) {
+            new QuartersPlaceholderExpansion().register();
+        }
+
+        // Loading the hook classes like this prevents missing dependencies being noticed
+        Plugin dynmap = pm.getPlugin("dynmap");
+        if (dynmap != null && dynmap.isEnabled()) {
+            this.initializeMapHook("QuartersDynmapHook");
+            logInfo("Enabled Dynmap integration");
+        }
+
+        Plugin bluemap = pm.getPlugin("BlueMap");
+        if (bluemap != null && bluemap.isEnabled()) {
+            this.initializeMapHook("QuartersBlueMapHook");
+            logInfo("Enabled BlueMap integration");
+        }
+    }
+
+    private void initializeMapHook(String name) {
+        try {
+            String prefix = "au.lupine.quarters.hook";
+            Class<?> clazz = Class.forName(prefix + "." + name);
+            QuartersMapHook mapHook = (QuartersMapHook) clazz.getConstructor().newInstance();
+            mapHook.initialize();
+        } catch (Exception e) {
+            logSevere("Failed to initialize map hook. " + e.getMessage());
+        }
     }
 
     private void registerListeners(Listener... listeners) {

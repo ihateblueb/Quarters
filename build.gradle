@@ -35,6 +35,10 @@ repositories {
     maven {
         url = "https://repo.mikeprimm.com/"
     }
+
+    maven {
+        url = "https://repo.bluecolored.de/releases/"
+    }
 }
 
 dependencies {
@@ -42,9 +46,10 @@ dependencies {
     compileOnly("com.palmergames.bukkit.towny:towny:0.101.2.5")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("us.dynmap:DynmapCoreAPI:3.7-beta-6")
+    compileOnly("de.bluecolored:bluemap-api:2.7.7")
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion

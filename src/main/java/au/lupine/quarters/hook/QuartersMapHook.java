@@ -4,6 +4,8 @@ import au.lupine.quarters.object.entity.Quarter;
 
 public interface QuartersMapHook {
 
+    void initialize();
+
     void addQuarterMarkers(Quarter q);
 
     void removeQuarterMarkers(Quarter q);

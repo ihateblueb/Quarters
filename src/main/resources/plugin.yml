@@ -12,6 +12,7 @@ depend: [Towny]
 softdepend:
   - PlaceholderAPI
   - dynmap
+  - BlueMap
 
 commands:
   quarters:

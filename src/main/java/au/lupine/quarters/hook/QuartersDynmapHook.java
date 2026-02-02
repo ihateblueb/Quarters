@@ -5,7 +5,6 @@ import au.lupine.quarters.api.manager.QuarterManager;
 import au.lupine.quarters.object.entity.Cuboid;
 import au.lupine.quarters.object.entity.Quarter;
 import au.lupine.quarters.object.wrapper.Pair;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class QuartersDynmapHook extends DynmapCommonAPIListener implements QuartersMapHook {
+public class QuartersDynmapHook implements QuartersMapHook {
 
     private static QuartersDynmapHook instance;
 
@@ -26,10 +25,14 @@ public class QuartersDynmapHook extends DynmapCommonAPIListener implements Quart
     }
 
 
+    public void initialize() {
+        DynmapCommonAPIListener.register(new QuartersDynmapListener());
+    }
+
+
     MarkerSet quarterMarkerSet;
 
-    @Override
-    public void apiEnabled(DynmapCommonAPI api) {
+    public void enable(DynmapCommonAPI api) {
         QuarterManager qm = QuarterManager.getInstance();
 
         if (Objects.isNull(api)) return;
