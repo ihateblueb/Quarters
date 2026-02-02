@@ -5,9 +5,11 @@ import au.lupine.quarters.api.manager.QuarterManager;
 import au.lupine.quarters.object.entity.Cuboid;
 import au.lupine.quarters.object.entity.Quarter;
 import au.lupine.quarters.object.wrapper.Pair;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
+import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.MarkerSet;
 
 import java.util.ArrayList;
@@ -55,7 +57,7 @@ public class QuartersDynmapHook extends DynmapCommonAPIListener implements Quart
 
         quarterMarkerSet.createAreaMarker(
                 areaName,
-                q.getName(),
+                mm.getQuarterMarkerLabel(q),
                 true,
                 qWorld.getName(),
                 tracedX,
@@ -68,7 +70,9 @@ public class QuartersDynmapHook extends DynmapCommonAPIListener implements Quart
         MapManager mm = MapManager.getInstance();
 
         String areaName = mm.getQuarterMarkerIdentifier(q);
-        quarterMarkerSet.findAreaMarker(areaName).deleteMarker();
+        AreaMarker foundMarker = quarterMarkerSet.findAreaMarker(areaName);
+
+        if (foundMarker != null) foundMarker.deleteMarker();
     }
 
     public void refreshQuarterMarker(Quarter q) {
@@ -81,11 +85,19 @@ public class QuartersDynmapHook extends DynmapCommonAPIListener implements Quart
         ArrayList<Double> tracedZ = new ArrayList<>();
 
         q.getCuboids().forEach((Cuboid c) -> {
-            tracedX.add(c.getCornerOne().x());
-            tracedX.add(c.getCornerTwo().x());
+            Location c1 = c.getCornerBlockOne().getLocation();
+            Location c2 = c.getCornerBlockTwo().getLocation();
 
-            tracedZ.add(c.getCornerOne().z());
-            tracedZ.add(c.getCornerTwo().z());
+            tracedX.add(c1.x() + 1);
+            tracedZ.add(c1.z() + 1);
+            tracedX.add(c1.x() + 1);
+            tracedZ.add(c2.z() + 1);
+            tracedX.add(c2.x() + 1);
+            tracedZ.add(c2.z());
+            tracedX.add(c2.x());
+            tracedZ.add(c1.z());
+            tracedX.add(c1.x());
+            tracedZ.add(c1.z() + 1);
         });
 
         return Pair.of(
@@ -93,5 +105,5 @@ public class QuartersDynmapHook extends DynmapCommonAPIListener implements Quart
                 tracedZ.stream().mapToDouble(d -> d).toArray()
         );
     }
-    
+
 }
