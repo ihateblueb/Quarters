@@ -31,12 +31,17 @@ repositories {
     maven {
         url = "https://repo.glaremasters.me/repository/towny/"
     }
+
+    maven {
+        url = "https://repo.mikeprimm.com/"
+    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     compileOnly("com.palmergames.bukkit.towny:towny:0.101.2.5")
     compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("us.dynmap:DynmapCoreAPI:3.7-beta-6")
 }
 
 def targetJavaVersion = 17

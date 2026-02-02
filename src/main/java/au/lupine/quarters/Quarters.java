@@ -3,6 +3,7 @@ package au.lupine.quarters;
 import au.lupine.quarters.api.manager.ConfigManager;
 import au.lupine.quarters.command.quarters.QuartersCommand;
 import au.lupine.quarters.command.quartersadmin.QuartersAdminCommand;
+import au.lupine.quarters.hook.QuartersDynmapListener;
 import au.lupine.quarters.hook.QuartersPlaceholderExpansion;
 import au.lupine.quarters.listener.*;
 import au.lupine.quarters.object.metadata.QuarterListDataField;
@@ -15,7 +16,9 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.DynmapCommonAPIListener;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public final class Quarters extends JavaPlugin {
@@ -47,6 +50,11 @@ public final class Quarters extends JavaPlugin {
             logWarning("You seem to be using an older version of Towny, version 0.101.2.5 or above is required for quarters statistics to show in resident/town status screens.");
         } else {
             registerListeners(new StatusScreenListener());
+        }
+
+        if (Objects.nonNull(this.getServer().getPluginManager().getPlugin("dynmap"))) {
+            logInfo("Enabled Dynmap integration");
+            DynmapCommonAPIListener.register(new QuartersDynmapListener());
         }
 
         logInfo("Quarters enabled :3");
