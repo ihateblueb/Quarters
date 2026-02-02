@@ -3,7 +3,7 @@ package au.lupine.quarters;
 import au.lupine.quarters.api.manager.ConfigManager;
 import au.lupine.quarters.command.quarters.QuartersCommand;
 import au.lupine.quarters.command.quartersadmin.QuartersAdminCommand;
-import au.lupine.quarters.hook.QuartersDynmapListener;
+import au.lupine.quarters.hook.QuartersDynmapHook;
 import au.lupine.quarters.hook.QuartersPlaceholderExpansion;
 import au.lupine.quarters.listener.*;
 import au.lupine.quarters.object.metadata.QuarterListDataField;
@@ -18,7 +18,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapCommonAPIListener;
 
-import java.util.Objects;
 import java.util.logging.Logger;
 
 public final class Quarters extends JavaPlugin {
@@ -52,9 +51,9 @@ public final class Quarters extends JavaPlugin {
             registerListeners(new StatusScreenListener());
         }
 
-        if (Objects.nonNull(this.getServer().getPluginManager().getPlugin("dynmap"))) {
+        if (this.getServer().getPluginManager().getPlugin("dynmap").isEnabled()) {
             logInfo("Enabled Dynmap integration");
-            DynmapCommonAPIListener.register(new QuartersDynmapListener());
+            DynmapCommonAPIListener.register(QuartersDynmapHook.getInstance());
         }
 
         logInfo("Quarters enabled :3");

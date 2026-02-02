@@ -82,10 +82,13 @@ public class Quarter extends TownyObject {
     @Override
     public void save() {
         QuarterManager qm = QuarterManager.getInstance();
+        MapManager mm = MapManager.getInstance();
 
         List<Quarter> quarters = qm.getQuarters(town);
         quarters.remove(this);
         quarters.add(this);
+
+        mm.refreshQuarterMarker(this);
 
         qm.setQuarters(town, quarters);
     }
@@ -95,9 +98,12 @@ public class Quarter extends TownyObject {
      */
     public void delete() {
         QuarterManager qm = QuarterManager.getInstance();
+        MapManager mm = MapManager.getInstance();
 
         List<Quarter> quarters = qm.getQuarters(town);
         quarters.remove(this);
+
+        mm.removeQuarterMarker(this);
 
         qm.setQuarters(town, quarters);
     }
