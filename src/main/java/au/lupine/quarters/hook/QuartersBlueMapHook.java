@@ -46,8 +46,6 @@ public class QuartersBlueMapHook implements QuartersMapHook {
 
     public void addQuarterMarkers(@NotNull Quarter q) {
         BlueMapAPI.onEnable(api -> {
-            Quarters.logInfo("INVOKING ADDQM " + q.getName());
-
             MapManager mm = MapManager.getInstance();
             MarkerSet ms = getMarkerSet(api, getQuarterWorld(q));
 
@@ -97,8 +95,6 @@ public class QuartersBlueMapHook implements QuartersMapHook {
 
     public void removeQuarterMarkers(@NotNull Quarter q) {
         BlueMapAPI.onEnable(api -> {
-            Quarters.logInfo("INVOKING DELETEQM "+ q.getName());
-
             MapManager mm = MapManager.getInstance();
             MarkerSet ms = getMarkerSet(api, getQuarterWorld(q));
 
