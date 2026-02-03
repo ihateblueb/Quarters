@@ -10,10 +10,11 @@ import org.dynmap.DynmapCommonAPI;
 import org.dynmap.DynmapCommonAPIListener;
 import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.MarkerSet;
+import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuartersDynmapHook implements QuartersMapHook {
 
@@ -30,41 +31,42 @@ public class QuartersDynmapHook implements QuartersMapHook {
     }
 
 
-    MarkerSet quarterMarkerSet;
+    MarkerSet markerSet;
 
-    public void enable(DynmapCommonAPI api) {
+    public void enable(@NotNull DynmapCommonAPI api) {
         QuarterManager qm = QuarterManager.getInstance();
 
-        if (Objects.isNull(api)) return;
-
-        quarterMarkerSet = api.getMarkerAPI().createMarkerSet(
+        markerSet = api.getMarkerAPI().createMarkerSet(
                 "quarters",
                 "Quarters",
                 null,
                 false
         );
+        markerSet.setLayerPriority(2);
 
         qm.getAllQuarters().forEach(this::addQuarterMarkers);
     }
 
-    public void addQuarterMarkers(Quarter q) {
+    public void addQuarterMarkers(@NotNull Quarter q) {
         MapManager mm = MapManager.getInstance();
 
         String areaName = mm.getQuarterMarkerIdentifier(q);
 
         ArrayList<Pair<double[], double[]>> traced = traceQuarter(q);
 
-        // getFirst() errors on compile for some reason
         World qWorld = q.getCuboids().get(0).getWorld();
 
         String label =  mm.getQuarterMarkerLabel(q);
 
-        AtomicInteger i = new AtomicInteger();
-        traced.forEach((Pair<double[], double[]> t) -> {
+        for (int i = 0; i < traced.size(); i++) {
+            Pair<double[], double[]> t = traced.get(i);
+
             double[] tracedX = t.getFirst();
             double[] tracedZ = t.getSecond();
 
-            quarterMarkerSet.createAreaMarker(
+            Color color = q.getColour();
+
+            AreaMarker am = markerSet.createAreaMarker(
                     areaName + "_cuboid_" + i,
                     label,
                     true,
@@ -74,22 +76,23 @@ public class QuartersDynmapHook implements QuartersMapHook {
                     false
             );
 
-            i.getAndIncrement();
-        });
+            am.setFillStyle(0.5, color.getRGB() & 0x00FFFFFF);
+            am.setLineStyle(2, 1, color.getRGB() & 0x00FFFFFF);
+        }
     }
 
-    public void removeQuarterMarkers(Quarter q) {
+    public void removeQuarterMarkers(@NotNull Quarter q) {
         MapManager mm = MapManager.getInstance();
 
         String areaName = mm.getQuarterMarkerIdentifier(q);
 
         for (int i = 0; i < q.getCuboids().size(); i++) {
-            AreaMarker foundMarker = quarterMarkerSet.findAreaMarker(areaName + "_cuboid_" + i);
+            AreaMarker foundMarker = markerSet.findAreaMarker(areaName + "_cuboid_" + i);
             if (foundMarker != null) foundMarker.deleteMarker();
         }
     }
 
-    public ArrayList<Pair<double[], double[]>> traceQuarter(Quarter q) {
+    private ArrayList<Pair<double[], double[]>> traceQuarter(@NotNull Quarter q) {
         ArrayList<Pair<double[], double[]>> tracedCuboids = new ArrayList<>();
 
         q.getCuboids().forEach((Cuboid c) -> {
